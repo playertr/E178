@@ -1,110 +1,221 @@
 % Analytical Solutions of Constant-Thrust, Constant-Cd Rocket DEs
 % Tim Player
 
-% model parameters
+%% Model Parameters
 g = 9.81; %m/s^2
 m = 0.253; % mass of rocket + motor (kg)
-A_p = 0.00545; % projected area (m^2)
+A_p = 0.001363; % projected area (m^2)
 A_p_par = 0.1642;
 rho = 1.225; %kg/m^3
 C_d = 0.5;
 C_d_par = 1.4;
-motor_delay = 4; %s
-v_0 = 0;
-x_0 = 0;
-t_0 = 0;
 
-%Estes E9
+% %Estes E9, two-stage
+% T1 = 12.5; % thrust in N
+% t_1 = 0.6; % time in s
+% T2 = 8.5;
+% t_2 = 3;
+
+% %Estes E9, one-stage
+% T1 = 9; % thrust in N
+% t_1 = 0.6; % time in s
+% T2 = 9;
+% t_2 = 3;
+
+% % Estes E12, two-stage
+% T1 = 16.2; % thrust in N
+% t_1 = 0.5; % time in s
+% T2 = 10;
+% t_2 = 2.4;
+% 
+% % Estes E12, one-stage
+% T1 = 11.3; % thrust in N
+% t_1 = 0.5; % time in s
+% T2 = 11.3;
+% t_2 = 2.4;
+
+%% E9 Acceleration Plot
+e9_acc = figure;
+hold on;
+
+%Estes E9, two-stage
 T1 = 12.5; % thrust in N
 t_1 = 0.6; % time in s
 T2 = 8.5;
 t_2 = 3;
 
-%Estes E12
-% T1 = 16.2; % thrust in N
-% t_1 = 0.5; % time in s
-% T2 = 10;
-% t_2 = 2.4;
+plotAccel(e9_acc, 'b', g, m, A_p, A_p_par, rho, C_d, C_d_par, T1, t_1, T2, t_2);
+title('Acceleration Curves of Estes E9 Motor')
+ylabel('Acceleration (m/s^2)');
+xlabel('Time (s)');
 
-%% initial burn (stage 1)
-v_max = sqrt( (2 * T1 - m*g)/(rho * C_d * A_p) );
-b = T1/m - g;
+%Estes E9, one-stage
+T1 = 9; % thrust in N
+t_1 = 0.6; % time in s
+T2 = 9;
+t_2 = 3;
 
-v = @(t) v_max * tanh(b / v_max * (t - t_0) + atanh(v_0 / v_max) ); %v_0 < v_max
+plotAccel(e9_acc, 'k', g, m, A_p, A_p_par, rho, C_d, C_d_par, T1, t_1, T2, t_2);
 
-x = @(t) x_0 + v_max^2/b * ...
-    (log(sinh( b/v_max * (t-t_0) + acoth(v_0/v_max) ) ) ...
-    - log(sinh(acoth(v_0/v_max))));
+% hacky workaround for legend
+h = zeros(3, 1);
+h(1) = plot(NaN,NaN,'b');
+h(2) = plot(NaN,NaN,'k');
+h(3) = plot(NaN,NaN,'m');
+legend(h, 'Two-Stage','One-Stage','Rocksim');
 
-a_v = @(v) T1/m - 0.5 * C_d * A_p * rho/m * v * abs(v) - g;
-a = @(t) a_v(v(t)); 
-
-clf;
+%% 9 Velocity Plot
+e9_vel = figure;
 hold on;
-fplot(a, [t_0 t_1], 'b');
-fplot(v, [t_0 t_1], 'm');
-fplot(x, [t_0 t_1], 'k');
 
-v_1 = v(t_1);
-x_1 = x(t_1);
+%Estes E9, two-stage
+T1 = 12.5; % thrust in N
+t_1 = 0.6; % time in s
+T2 = 8.5;
+t_2 = 3;
 
-%% sustainer burn (stage 2)
-v_max = sqrt( (2 * T2 - m*g)/(rho * C_d * A_p) );
 
-if v_1 < v_max
-    disp('The rocket will not decelerate in the second stage.');
-else
-    disp('The rocket will decelerate in the second stage.')
-end
+plotVel(e9_vel, 'b', g, m, A_p, A_p_par, rho, C_d, C_d_par, T1, t_1, T2, t_2);
+title('Velocity Curves of Estes E9 Motor');
+ylabel('Velocity (m/s)');
+xlabel('Time (s)');
 
-b = T2/m - g;
+%Estes E9, one-stage
+T1 = 9; % thrust in N
+t_1 = 0.6; % time in s
+T2 = 9;
+t_2 = 3;
 
-v = @(t) v_max * tanh(b / v_max * (t - t_1) + atanh(v_1 / v_max) ); %v_1 < v_max
+plotVel(e9_vel, 'k', g, m, A_p, A_p_par, rho, C_d, C_d_par, T1, t_1, T2, t_2);
 
-x = @(t) x_1 + v_max^2/b * ...
-    (log(sinh( b/v_max * (t-t_1) + acoth(v_1/v_max) ) ) ...
-    - log(sinh(acoth(v_1/v_max))));
+% hacky workaround for legend
+h = zeros(3, 1);
+h(1) = plot(NaN,NaN,'b');
+h(2) = plot(NaN,NaN,'k');
+h(3) = plot(NaN,NaN,'m');
+legend(h, 'Two-Stage','One-Stage','Rocksim');
 
-a_v = @(v) T2/m - 0.5 * C_d * A_p * rho/m * v * abs(v) - g;
-a = @(t) a_v(v(t)); 
+%% E9 Altitude Plot
+e9_alt = figure;
+hold on;
 
-fplot(a, [t_1 t_2], 'b');
-fplot(v, [t_1 t_2], 'm');
-fplot(x, [t_1 t_2], 'k');
+%Estes E9, two-stage
+T1 = 12.5; % thrust in N
+t_1 = 0.6; % time in s
+T2 = 8.5;
+t_2 = 3;
 
-v_2 = v(t_2);
-x_2 = x(t_2);
-%% thrustless ascent (stage 3)
-v_t = sqrt( 2 * m * g / (rho * C_d * A_p));
-t_3 = t_2 + v_t/g * atan(v_2/v_t); %time to apogee
+plotAlt(e9_alt, 'b', g, m, A_p, A_p_par, rho, C_d, C_d_par, T1, t_1, T2, t_2);
+title('Altitude Curves of Estes E9 Motor');
+ylabel('Altitude (m)');
+xlabel('Time (s)');
 
-v = @(t) v_t * tan( -g/v_t * (t - t_2) + atan(v_2/v_t));
+%Estes E9, one-stage
+T1 = 9; % thrust in N
+t_1 = 0.6; % time in s
+T2 = 9;
+t_2 = 3;
 
-x = @(t) x_2 + v_t^2/g * ...
-    (log( cos(g/v_t * (t - t_2) - atan(v_2/v_t))) ...
-    + log( sqrt(1 + v_2^2/v_t^2)));
 
-a_v = @(v) -g(1 + v^2 / v_t^2);
-a = @(t) a(v(t));
+plotAlt(e9_alt, 'k', g, m, A_p, A_p_par, rho, C_d, C_d_par, T1, t_1, T2, t_2);
 
-fplot(a, [t_2 t_3], 'b');
-fplot(v, [t_2 t_3], 'm');
-fplot(x, [t_2 t_3], 'k');
+% hacky workaround for legend
+h = zeros(3, 1);
+h(1) = plot(NaN,NaN,'b');
+h(2) = plot(NaN,NaN,'k');
+h(3) = plot(NaN,NaN,'m');
+legend(h, 'Two-Stage','One-Stage','Rocksim');
 
-v_3 = v(t_3);
-x_3 = x(t_3);
+%% E12 Acceleration Plot
+e12_acc = figure;
+hold on;
 
-%% parachute descent (stage 4)
-v_t = sqrt( 2 * m * g / (rho * C_d_par * A_p_par));
-t_4 = t_3 + v_t/g * acosh(exp(g/v_t^2 * x_3));
+% Estes E12, two-stage
+T1 = 16.2; % thrust in N
+t_1 = 0.5; % time in s
+T2 = 10;
+t_2 = 2.4;
 
-v = @(t) v_t * tanh( -g/v_t *( t - t_3));
+plotAccel(e12_acc, 'b', g, m, A_p, A_p_par, rho, C_d, C_d_par, T1, t_1, T2, t_2);
+title('Acceleration Curves of Estes E12 Motor');
+ylabel('Acceleration (m/s^2)');
+xlabel('Time (s)');
 
-x = @(t) x_3 - v_t^2/g * log( cosh( -g/v_t * (t - t_3)));
+% Estes E12, one-stage
+T1 = 11.3; % thrust in N
+t_1 = 0.5; % time in s
+T2 = 11.3;
+t_2 = 2.4;
 
-a_v = @(v) -g * (1 - v^2/v_t^2);
-a = @(t) a(v(t));
+plotAccel(e12_acc, 'k', g, m, A_p, A_p_par, rho, C_d, C_d_par, T1, t_1, T2, t_2);
 
-fplot(a, [t_3 t_4], 'b');
-fplot(v, [t_3 t_4], 'm');
-fplot(x, [t_3 t_4], 'k');
+% hacky workaround for legend
+h = zeros(3, 1);
+h(1) = plot(NaN,NaN,'b');
+h(2) = plot(NaN,NaN,'k');
+h(3) = plot(NaN,NaN,'m');
+legend(h, 'Two-Stage','One-Stage','Rocksim');
+
+%% E12 Velocity Plot
+e12_vel = figure;
+hold on;
+
+% Estes E12, two-stage
+T1 = 16.2; % thrust in N
+t_1 = 0.5; % time in s
+T2 = 10;
+t_2 = 2.4;
+
+plotVel(e12_vel, 'b', g, m, A_p, A_p_par, rho, C_d, C_d_par, T1, t_1, T2, t_2);
+title('Velocity Curves of Estes E12 Motor');
+ylabel('Velocity (m/s)');
+xlabel('Time (s)');
+
+% Estes E12, one-stage
+T1 = 11.3; % thrust in N
+t_1 = 0.5; % time in s
+T2 = 11.3;
+t_2 = 2.4;
+
+plotVel(e12_vel, 'k', g, m, A_p, A_p_par, rho, C_d, C_d_par, T1, t_1, T2, t_2);
+
+% hacky workaround for legend
+h = zeros(3, 1);
+h(1) = plot(NaN,NaN,'b');
+h(2) = plot(NaN,NaN,'k');
+h(3) = plot(NaN,NaN,'m');
+legend(h, 'Two-Stage','One-Stage','Rocksim');
+
+%% E12 Altitude Plot
+e12_alt = figure;
+hold on;
+
+% Estes E12, two-stage
+T1 = 16.2; % thrust in N
+t_1 = 0.5; % time in s
+T2 = 10;
+t_2 = 2.4;
+
+plotAlt(e12_alt, 'b', g, m, A_p, A_p_par, rho, C_d, C_d_par, T1, t_1, T2, t_2);
+title('Altitude Curves of Estes E12 Motor');
+ylabel('Altitude (m)');
+xlabel('Time (s)');
+
+% Estes E12, one-stage
+T1 = 11.3; % thrust in N
+t_1 = 0.5; % time in s
+T2 = 11.3;
+t_2 = 2.4;
+
+plotAlt(e12_alt, 'k', g, m, A_p, A_p_par, rho, C_d, C_d_par, T1, t_1, T2, t_2);
+
+% hacky workaround for legend
+h = zeros(3, 1);
+h(1) = plot(NaN,NaN,'b');
+h(2) = plot(NaN,NaN,'k');
+h(3) = plot(NaN,NaN,'m');
+legend(h, 'Two-Stage','One-Stage','Rocksim');
+
+
+
+%plotAll(5,  g, m, A_p, A_p_par, rho, C_d, C_d_par, T1, t_1, T2, t_2)
